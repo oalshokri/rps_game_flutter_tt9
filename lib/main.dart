@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -29,12 +30,25 @@ class _GameState extends State<Game> {
 
   int scoreYou = 0;
   int scoreSystem = 0;
+  double turns = 0.0;
+  bool isPlay = false;
+
+  void _changeRotation() {
+    setState(() => turns += 1.0);
+  }
 
   void play(int choice) {
-    setState(() {
-      userChoice = choice;
-      systemChoice = Random().nextInt(3);
-      roundWinner();
+    isPlay = true;
+    userChoice = choice;
+    turns += 1.0;
+    setState(() => turns += 1.0);
+    Timer(Duration(seconds: 1), () {
+      setState(() {
+        systemChoice = Random().nextInt(3);
+        isPlay = false;
+
+        roundWinner();
+      });
     });
   }
 
@@ -60,16 +74,63 @@ class _GameState extends State<Game> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      backgroundColor: Colors.blueAccent,
+      // backgroundColor: Colors.blueAccent,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          AnimatedOpacity(
+            opacity: isPlay ? 1 : 0,
+            // opacity: 1,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: AnimatedScale(
+              duration: Duration(milliseconds: 200),
+              scale: isPlay ? 1 : 0,
+              curve: Curves.easeInOut,
+              child: AnimatedRotation(
+                turns: turns,
+                duration: Duration(seconds: 1),
+                curve: Curves.easeInOut,
+                child: Column(
+                  children: [
+                    Image.asset(
+                      "images/btn0.png",
+                      height: 30,
+                      width: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "images/btn1.png",
+                          height: 30,
+                          width: 30,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Image.asset(
+                          "images/btn2.png",
+                          height: 30,
+                          width: 30,
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
-                  Image.asset("images/btn$userChoice.png"),
+                  AnimatedScale(
+                      duration: Duration(milliseconds: 200),
+                      scale: !isPlay ? 1.0 : 0,
+                      curve: Curves.easeInOut,
+                      child: Image.asset("images/btn$userChoice.png")),
                   SizedBox(
                     height: 12,
                   ),
@@ -88,7 +149,11 @@ class _GameState extends State<Game> {
               ),
               Column(
                 children: [
-                  Image.asset("images/btn$systemChoice.png"),
+                  AnimatedScale(
+                      duration: Duration(milliseconds: 200),
+                      scale: !isPlay ? 1.0 : 0,
+                      curve: Curves.easeInOut,
+                      child: Image.asset("images/btn$systemChoice.png")),
                   SizedBox(
                     height: 12,
                   ),
@@ -100,14 +165,12 @@ class _GameState extends State<Game> {
               ),
             ],
           ),
-          SizedBox(
-            height: 80,
-          ),
           Column(
             children: [
               TextButton(
                 onPressed: () {
                   play(0);
+                  // _changeRotation();
                 },
                 child: Image.asset(
                   "images/btn0.png",
@@ -121,6 +184,7 @@ class _GameState extends State<Game> {
                   TextButton(
                     onPressed: () {
                       play(1);
+                      // _changeRotation();
                     },
                     child: Image.asset(
                       "images/btn1.png",
@@ -141,6 +205,9 @@ class _GameState extends State<Game> {
                 ],
               ),
             ],
+          ),
+          SizedBox(
+            height: 44,
           )
         ],
       ),
